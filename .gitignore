@@ -1,0 +1,19 @@
+__pycache__/
+
+# PyCharm
+.idea/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+
+# logs
+*.log
+
+# file created by Mac OS X
+.DS_Store
+
+# other
