@@ -1,26 +1,17 @@
 import logging
-from datetime import datetime
+# from datetime import datetime
 from pprint import pprint
+from time import sleep
 from urllib.parse import urljoin
 
 import requests
 from requests.exceptions import ReadTimeout
 from dotenv import dotenv_values
 
+
 DEVMAN_URL = 'https://dvmn.org'
 TIMEOUT = 120
 
-
-# def fetch_reviews(token):
-#     """" Получить список проверок
-#     """
-#     url = DEVMAN_URL + '/api/user_reviews/'
-#     headers = {'Authorization': f'Token {token}'}
-#     response = requests.get(url, headers=headers)
-#     response.raise_for_status()
-#
-#     reviews = response.json()
-#     return reviews
 
 def fetch_reviews(token, timestamp=None):
     """" Получить список проверок через long polling
@@ -36,30 +27,29 @@ def fetch_reviews(token, timestamp=None):
 
 def main():
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
-    # reviews = fetch_reviews(devman_token)
-    # pprint(reviews)
-
     timestamp = None
 
-    for _ in range(3):
+    while True:
         try:
             response = fetch_reviews(devman_token, timestamp)
-        except ReadTimeout as error:
-            logging.error(f'Сервер не успел ответить.\n{error}\nУвеличьте время TIMEOUT.')
-            break
-
-        status = response.get('status')
-        if status == 'timeout':
-            timestamp = response.get('timestamp_to_request')
-            logging.info(f'Работы еще на проверке.')
-        elif status == 'found':
-            timestamp = response.get('last_attempt_timestamp')
-            # time_server = datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y %H:%M:%S')
-            logging.info(f'Статус проверки работ изменился.')
-            new_attempts = response.get('new_attempts')
-            pprint(new_attempts)
+        except ReadTimeout:
+            logging.warning(f'Сервер не успел ответить. Увеличьте время TIMEOUT.')
+        except requests.ConnectionError:
+            logging.warning(f'Интернет отключился. Переподключение...')
+            sleep(1)
         else:
-            logging.error(f'Неожиданный ответ от сервера:\n{response}')
+            status = response.get('status')
+            if status == 'timeout':
+                timestamp = response.get('timestamp_to_request')
+                logging.info(f'Работы еще ожидают ревью.')
+            elif status == 'found':
+                timestamp = response.get('last_attempt_timestamp')
+                # time_server = datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y %H:%M:%S')
+                logging.info(f'Статус проверки работ изменился.')
+                new_attempts = response.get('new_attempts')
+                pprint(new_attempts)
+            else:
+                logging.error(f'Неожиданный ответ от сервера:\n{response}')
 
 
         # {'last_attempt_timestamp': 1681922270.298238,
