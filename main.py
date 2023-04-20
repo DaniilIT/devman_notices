@@ -1,13 +1,11 @@
 import argparse
 import logging
-# from datetime import datetime
 from time import sleep
 from urllib.parse import urljoin
 
 import requests
 import telegram
 from dotenv import dotenv_values
-from requests.exceptions import ReadTimeout
 
 DEVMAN_URL = 'https://dvmn.org'
 TIMEOUT = 120
@@ -32,11 +30,11 @@ def main(chat_id=None):
         chat_id = dotenv_values('.env')['CHAT_ID']
 
     bot = telegram.Bot(token=telegram_token)
-    timestamp = 1681922260  # None
+    timestamp = None
     while True:
         try:
             response = fetch_reviews(devman_token, timestamp)
-        except ReadTimeout:
+        except requests.exceptions.ReadTimeout:
             logging.warning(f'Сервер не успел ответить. Увеличьте время TIMEOUT.')
         except requests.ConnectionError:
             logging.warning(f'Интернет отключился. Переподключение...')
@@ -48,7 +46,6 @@ def main(chat_id=None):
                 logging.info('Работы еще ожидают ревью.')
             elif status == 'found':
                 timestamp = response['last_attempt_timestamp']
-                # time_server = datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y %H:%M:%S')
                 logging.info('Статус проверки работ изменился.')
                 for attempt in response['new_attempts']:
                     review = 'К сожалению, в работе нашлись ошибки\.' if attempt['is_negative'] \
@@ -81,5 +78,3 @@ if __name__ == '__main__':
                         format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
     args = create_parser().parse_args()
     main(args.chat_id)
-    # str = f'{BAD_ATTEMPT if True else GOOD_ATTEMPT}'
-    # print(str)
