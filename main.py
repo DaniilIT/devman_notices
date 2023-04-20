@@ -1,3 +1,4 @@
+import argparse
 import logging
 # from datetime import datetime
 from time import sleep
@@ -24,10 +25,11 @@ def fetch_reviews(token, timestamp=None):
     return response.json()
 
 
-def main():
+def main(chat_id=None):
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
     telegram_token = dotenv_values('.env')['TELEGRAM_TOKEN']
-    chat_id = dotenv_values('.env')['CHAT_ID']
+    if chat_id is None:
+        chat_id = dotenv_values('.env')['CHAT_ID']
 
     bot = telegram.Bot(token=telegram_token)
     timestamp = 1681922260  # None
@@ -61,9 +63,23 @@ def main():
                 logging.error(f'Неожиданный ответ от сервера:\n{response}')
 
 
+def create_parser():
+    """ Функция производит синтаксический анализ командной строки.
+    """
+    parser = argparse.ArgumentParser(
+        description='Программа присылает уведомления о проверке работ курсов DEVMAN.'
+    )
+    parser.add_argument(
+        '--chat_id',
+        help='Идентификатор чата telegram',
+    )
+    return parser
+
+
 if __name__ == '__main__':
     logging.basicConfig(filename='responses.log', filemode='a', level=logging.INFO,
                         format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
-    main()
+    args = create_parser().parse_args()
+    main(args.chat_id)
     # str = f'{BAD_ATTEMPT if True else GOOD_ATTEMPT}'
     # print(str)
