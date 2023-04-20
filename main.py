@@ -5,6 +5,7 @@ from time import sleep
 from urllib.parse import urljoin
 
 import requests
+import telegram
 from requests.exceptions import ReadTimeout
 from dotenv import dotenv_values
 
@@ -27,8 +28,11 @@ def fetch_reviews(token, timestamp=None):
 
 def main():
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
-    timestamp = None
+    telegram_token = dotenv_values('.env')['TELEGRAM_TOKEN']
+    chat_id = dotenv_values('.env')['CHAT_ID']
 
+    bot = telegram.Bot(token=telegram_token)
+    timestamp = None
     while True:
         try:
             response = fetch_reviews(devman_token, timestamp)
@@ -47,6 +51,7 @@ def main():
                 # time_server = datetime.fromtimestamp(timestamp).strftime('%d-%m-%Y %H:%M:%S')
                 logging.info(f'Статус проверки работ изменился.')
                 new_attempts = response.get('new_attempts')
+                bot.send_message(text='Преподаватель проверил работу!', chat_id=chat_id)
                 pprint(new_attempts)
             else:
                 logging.error(f'Неожиданный ответ от сервера:\n{response}')
