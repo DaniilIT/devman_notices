@@ -20,6 +20,7 @@ def create_parser():
     parser.add_argument(
         '--chat_id',
         help='Идентификатор чата telegram',
+        default=dotenv_values('.env').get('CHAT_ID'),
     )
     return parser
 
@@ -39,13 +40,11 @@ def fetch_reviews(token, timestamp=None):
 def main():
     logging.basicConfig(filename='responses.log', filemode='a', level=logging.INFO,
                         format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
+
     args = create_parser().parse_args()
     chat_id = args.chat_id
-
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
     telegram_token = dotenv_values('.env')['TELEGRAM_TOKEN']
-    if chat_id is None:
-        chat_id = dotenv_values('.env')['CHAT_ID']
 
     bot = telegram.Bot(token=telegram_token)
     timestamp = None
