@@ -31,10 +31,10 @@ def fetch_reviews(token, timestamp=None):
     url = urljoin(DEVMAN_URL, '/api/long_polling/')
     headers = {'Authorization': f'Token {token}'}
     payload = {'timestamp': timestamp} if timestamp else {}
-    response = requests.get(url, headers=headers, params=payload, timeout=TIMEOUT)
-    response.raise_for_status()
+    reviews = requests.get(url, headers=headers, params=payload, timeout=TIMEOUT)
+    reviews.raise_for_status()
 
-    return response.json()
+    return reviews.json()
 
 
 def main():
@@ -50,21 +50,21 @@ def main():
     timestamp = None
     while True:
         try:
-            response = fetch_reviews(devman_token, timestamp)
+            reviews = fetch_reviews(devman_token, timestamp)
         except requests.exceptions.ReadTimeout:
             logging.warning(f'Сервер не успел ответить. Увеличьте время TIMEOUT.')
         except requests.ConnectionError:
             logging.warning(f'Интернет отключился. Переподключение...')
             sleep(1)
         else:
-            status = response.get('status')
+            status = reviews.get('status')
             if status == 'timeout':
-                timestamp = response['timestamp_to_request']
+                timestamp = reviews['timestamp_to_request']
                 logging.info('Работы еще ожидают ревью.')
             elif status == 'found':
-                timestamp = response['last_attempt_timestamp']
+                timestamp = reviews['last_attempt_timestamp']
                 logging.info('Статус проверки работ изменился.')
-                for attempt in response['new_attempts']:
+                for attempt in reviews['new_attempts']:
                     review = 'К сожалению, в работе нашлись ошибки\.' if attempt['is_negative'] \
                         else 'Преподавателю всё понравилось, можно приступать к следующему уроку\!'
                     bot.send_message(
@@ -74,7 +74,7 @@ def main():
                         parse_mode=telegram.ParseMode.MARKDOWN_V2
                     )
             else:
-                logging.error(f'Неожиданный ответ от сервера:\n{response}')
+                logging.error(f'Неожиданный ответ от сервера:\n{reviews}')
 
 
 if __name__ == '__main__':
