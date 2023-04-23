@@ -11,6 +11,19 @@ DEVMAN_URL = 'https://dvmn.org'
 TIMEOUT = 120
 
 
+def create_parser():
+    """ Функция производит синтаксический анализ командной строки.
+    """
+    parser = argparse.ArgumentParser(
+        description='Программа присылает уведомления о проверке работ курсов DEVMAN.'
+    )
+    parser.add_argument(
+        '--chat_id',
+        help='Идентификатор чата telegram',
+    )
+    return parser
+
+
 def fetch_reviews(token, timestamp=None):
     """" Получить список проверок через long polling
     """
@@ -23,7 +36,12 @@ def fetch_reviews(token, timestamp=None):
     return response.json()
 
 
-def main(chat_id=None):
+def main():
+    logging.basicConfig(filename='responses.log', filemode='a', level=logging.INFO,
+                        format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
+    args = create_parser().parse_args()
+    chat_id = args.chat_id
+
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
     telegram_token = dotenv_values('.env')['TELEGRAM_TOKEN']
     if chat_id is None:
@@ -60,21 +78,5 @@ def main(chat_id=None):
                 logging.error(f'Неожиданный ответ от сервера:\n{response}')
 
 
-def create_parser():
-    """ Функция производит синтаксический анализ командной строки.
-    """
-    parser = argparse.ArgumentParser(
-        description='Программа присылает уведомления о проверке работ курсов DEVMAN.'
-    )
-    parser.add_argument(
-        '--chat_id',
-        help='Идентификатор чата telegram',
-    )
-    return parser
-
-
 if __name__ == '__main__':
-    logging.basicConfig(filename='responses.log', filemode='a', level=logging.INFO,
-                        format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
-    args = create_parser().parse_args()
-    main(args.chat_id)
+    main()
