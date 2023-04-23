@@ -18,9 +18,9 @@ def create_parser():
         description='Программа присылает уведомления о проверке работ курсов DEVMAN.'
     )
     parser.add_argument(
-        '--chat_id',
+        '--tg_chat_id',
         help='Идентификатор чата telegram',
-        default=dotenv_values('.env').get('CHAT_ID'),
+        default=dotenv_values('.env').get('TG_CHAT_ID'),
     )
     return parser
 
@@ -42,7 +42,7 @@ def main():
                         format='%(levelname)s: %(asctime)s - %(message)s', datefmt='%d-%m-%Y %H:%M:%S')
 
     args = create_parser().parse_args()
-    chat_id = args.chat_id
+    tg_chat_id = args.tg_chat_id
     devman_token = dotenv_values('.env')['DEVMAN_TOKEN']
     telegram_token = dotenv_values('.env')['TELEGRAM_TOKEN']
 
@@ -68,7 +68,7 @@ def main():
                     review = 'К сожалению, в работе нашлись ошибки\.' if attempt['is_negative'] \
                         else 'Преподавателю всё понравилось, можно приступать к следующему уроку\!'
                     bot.send_message(
-                        chat_id=chat_id,
+                        chat_id=tg_chat_id,
                         text=f"У Вас проверили работу [\"{attempt['lesson_title']}\"]({attempt['lesson_url']})\."
                              f"\n\n{review}",
                         parse_mode=telegram.ParseMode.MARKDOWN_V2

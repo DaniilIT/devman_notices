@@ -16,10 +16,10 @@ pip install -r requirements.txt
 
 * `DEVMAN_TOKEN` - Чтобы идентифицировать DEVMAN аккаунт, вам потребуется токен доступа, получите его [здесь](https://dvmn.org/api/docs/).
 * `TELEGRAM_TOKEN` - Чтобы использовать BotFather (telegram бот), вам потребуется токен доступа, получите его [здесь](https://telegram.me/BotFather).
-* `CHAT_ID` - Чтобы назначить telegram чат, вам потребуется chat id, получите его [здесь](https://telegram.me/userinfobot).
+* `TG_CHAT_ID` - Чтобы назначить telegram чат, вам потребуется chat id, получите его [здесь](https://telegram.me/userinfobot).
 
 Вставьте токены и chat id, в файл .env, в формате `ПЕРЕМЕННАЯ=значение`.
-Переменную chat id вы можете не указывать здесь, если укажите её при запуске в качестве аргумента.
+TG_CHAT_ID вы можете не указывать здесь, если укажите её при запуске в качестве аргумента.
 
 
 ## Запуск
@@ -27,10 +27,10 @@ pip install -r requirements.txt
 Для запуска бота наберите команду:
 
 ```sh
-python main.py --chat_id <your_chat_id>
+python main.py --tg_chat_id <your_tg_chat_id>
 ```
 
-Если вы не указали chat_id в файле .env, то укажите здесь в качестве аргумента.
+Если вы не указали TG_CHAT_ID в файле .env, то укажите здесь в качестве аргумента.
 
 
 ## Цель проекта
